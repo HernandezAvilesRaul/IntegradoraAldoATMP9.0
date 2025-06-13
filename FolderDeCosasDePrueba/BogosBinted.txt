@@ -1,0 +1,20 @@
+Utilizar la arquitectura 
+Model (Backend)
+    Login
+        validar
+
+Module
+    login 
+    1.views --> HTML
+    2.stores --> APIS
+    3.constants --> Parametros (Usuarios y contraseñas) 
+    4.Styles --> CSS 
+    5.JavaScrypts 
+    6.Controller
+
+En el documento los escenarios poner un escenario de prueba por terceros
+Tengo que realizar un sprint por semana 
+
+En los business requirement poner los requimientos que se necesitan poner hasta el momento
+
+Definition of done: son los criterios de evaluacion
