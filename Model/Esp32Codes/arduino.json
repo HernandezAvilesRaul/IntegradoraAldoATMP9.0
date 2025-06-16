@@ -1,0 +1,5 @@
+{
+  "sketch": "src/main.cpp",
+  "fqbn": "esp32:esp32:esp32dev",
+  "port": "COM3"
+}
