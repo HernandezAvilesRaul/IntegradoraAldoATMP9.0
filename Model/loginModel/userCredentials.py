@@ -5,4 +5,5 @@ class User:
 
     def validate(self, inputUsername, inputPassword):
         return self.password == inputPassword and inputUsername == self.username
-        
+    
+

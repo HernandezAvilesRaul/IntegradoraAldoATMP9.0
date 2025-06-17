@@ -1,2 +1,5 @@
 # En tu archivo .gitignore
 .vscode/*
+*.pyc
+*.pyo
+*.pyd

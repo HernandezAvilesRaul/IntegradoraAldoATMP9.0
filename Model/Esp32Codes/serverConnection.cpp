@@ -1,4 +1,4 @@
-/*#include <WiFi.h>
+#include <WiFi.h>
 #include <HTTPClient.h>
 
 const char* ssid = "Totalplay-E64E";
@@ -39,4 +39,3 @@ void loop() {
 
   delay(3000);
 }
-*/
