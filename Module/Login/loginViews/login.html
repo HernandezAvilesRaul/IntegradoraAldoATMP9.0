@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 
   <meta charset="UTF-8">
   <title> Sign Up </title>
   <meta http-equiv="x-ua-compatible" content="ie=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="shortcut icon" href="../../Index/IndexStyles/Images/DoomIndustriesLogo.ico" />
-  <link rel="stylesheet" href="../LoginStyles/Login.css">
+  <link rel="shortcut icon" href="../../Index/indexStyles/images/DoomIndustriesLogo.ico" />
+  <link rel="stylesheet" href="../loginStyles/login.css">
 
 </head>
+
 <body class="align">
 
   <div class="grid align__item">
@@ -18,14 +20,14 @@
 
       <h2>Corporation Credentials</h2>
 
-      <form action="" method="post" class="form">
+      <form action="{{ url_for('login') }}" method="post" class="form">
 
         <div class="form__field">
-          <input type="email" placeholder="example@email.com">
+          <input type="text" placeholder="••••••••••••" name="username">
         </div>
 
         <div class="form__field">
-          <input type="password" placeholder="••••••••••••">
+          <input type="password" placeholder="••••••••••••" name="password">
         </div>
 
         <div class="form__field">
@@ -39,4 +41,5 @@
   </div>
 
 </body>
+
 </html>
