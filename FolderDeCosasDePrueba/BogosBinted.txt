@@ -10,7 +10,7 @@ Module
     3.constants --> Parametros (Usuarios y contraseñas) 
     4.Styles --> CSS 
     5.JavaScrypts 
-    6.Controller
+    6.Controller --> Controladores
 
 En el documento los escenarios poner un escenario de prueba por terceros
 Tengo que realizar un sprint por semana 
