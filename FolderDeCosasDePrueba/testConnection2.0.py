@@ -1,23 +1,28 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, jsonify, request
+from flask_socketio import SocketIO
 
 app = Flask(__name__)
+socketio = SocketIO(app)
 
-@app.route('/estado_boton', methods=['GET','POST'])
+estado_actual = "LOW"
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@socketio.on('connect')
+def handle_connect():
+    socketio.emit('estado_actual', {'estado': estado_actual})
+
+@app.route('/estado_boton', methods=['POST', 'GET'])
 def recibir_estado():
-    try:
-        data = request.get_json()
-        estado = data.get('estado')
-        
-        if estado not in ['HIGH', 'LOW']:
-            return jsonify({'error': 'Valor de estado no válido'}), 400
-            
-        print(f"Estado del botón recibido: {estado}")
-        
-        return jsonify({'mensaje': 'Estado recibido correctamente', 'estado': estado}), 200
-    
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({'error': 'Error al procesar la solicitud'}), 500
+    global estado_actual
+    data = request.get_json()
+    estado_actual = data.get('estado')
+    socketio.emit('estado_actual', {'estado': estado_actual})  # Envía a todos los clientes
+    return jsonify({'mensaje': 'Estado actualizado'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000, debug=True)
+
+    

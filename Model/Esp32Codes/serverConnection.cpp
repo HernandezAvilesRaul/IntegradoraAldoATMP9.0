@@ -30,7 +30,7 @@ void loop() {
     http.begin(serverUrl);
     http.addHeader("Content-Type", "application/json");
 
-    String json = "{\"estado\":\"" + valor + "\"/}";
+    String json = "{\"estado\":\"" + valor + "\"}";
     int code = http.POST(json);
     Serial.println("Estado del botón enviado: " + valor);
     Serial.println("Código de respuesta: " + String(code));

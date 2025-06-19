@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Estado del botón</title>
+</head>
+<body>
+    <h1>Estado del botón: <span id="estado">Cargando...</span></h1>
+    <p id="error" style="color: red;"></p>
+
+    <h1>Estado del botón: <span id="credentials">Cargando...</span></h1>
+    <p id="error" style="color: red;"></p>
+
+    <script>
+        function actualizarEstado() {
+            fetch('/get_estado')
+                .then(response => {
+                    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById("estado").textContent = data.estado;
+                    document.getElementById("error").textContent = "";
+                })
+                .catch(error => {
+                    document.getElementById("error").textContent = `Error: ${error.message}`;
+                    console.error("Error:", error);
+                });
+        }
+
+        function actualizarCredentials() {
+            fetch('/get_credentials')
+                .then(response => {
+                    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById("credentials").textContent = data.credecials;
+                    document.getElementById("error").textContent = "";
+                })
+                .catch(error => {
+                    document.getElementById("error").textContent = `Error: ${error.message}`;
+                    console.error("Error:", error);
+                });
+        }
+        setInterval(actualizarEstado, 2000);
+        actualizarEstado(); // Primera llamada inmediata
+    </script>
+</body>
+</html>
+
+
+
+    <h1>Estado del botón: <span id="estado">Cargando...</span></h1>
+
+    <script>
+        function actualizarEstado() {
+            fetch('/get_estado')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById("estado").textContent = data.estado;
+                });
+        }
+
+        setInterval(actualizarEstado, 2000);
+        actualizarEstado(); 
+    </script>
+
