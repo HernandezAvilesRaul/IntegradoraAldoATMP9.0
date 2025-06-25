@@ -1,67 +1,115 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Estado del botón</title>
-</head>
-<body>
-    <h1>Estado del botón: <span id="estado">Cargando...</span></h1>
-    <p id="error" style="color: red;"></p>
 
-    <h1>Estado del botón: <span id="credentials">Cargando...</span></h1>
-    <p id="error" style="color: red;"></p>
+<head>
+    <title>Debug - Estado del botón</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug-panel { 
+            background: #f0f0f0; 
+            padding: 15px; 
+            margin: 20px 0; 
+            border-radius: 5px;
+            border-left: 4px solid #007cba;
+        }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        .status { 
+            padding: 5px 10px; 
+            border-radius: 3px; 
+            display: inline-block; 
+            margin-left: 10px;
+        }
+        .online { background: #d4edda; color: #155724; }
+        .offline { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+
+<body>
+    <h1>Monitor de Credenciales</h1>
+    
+    <div>
+        <h2>Estado: <span id="status" class="status offline">Desconectado</span></h2>
+        <p><strong>Credenciales recibidas:</strong> <span id="credentials">Esperando...</span></p>
+        <p id="error_credentials" class="error"></p>
+    </div>
+
+    <div class="debug-panel">
+        <h3>🔧 Panel de Debug</h3>
+        <p><strong>Última respuesta del servidor:</strong><br>
+           <code id="debug_credentials">-</code></p>
+        <p><strong>Último error:</strong> <span id="debug_error">-</span></p>
+        <p><strong>Última actualización:</strong> <span id="last_update">-</span></p>
+        <p><strong>Intentos fallidos consecutivos:</strong> <span id="failed_attempts">0</span></p>
+    </div>
 
     <script>
-        function actualizarEstado() {
-            fetch('/get_estado')
-                .then(response => {
-                    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    document.getElementById("estado").textContent = data.estado;
-                    document.getElementById("error").textContent = "";
-                })
-                .catch(error => {
-                    document.getElementById("error").textContent = `Error: ${error.message}`;
-                    console.error("Error:", error);
-                });
-        }
+        let failedAttempts = 0;
+        const MAX_FAILED_ATTEMPTS = 5;
 
         function actualizarCredentials() {
+            console.log("Solicitando credenciales...");
+            
             fetch('/get_credentials')
                 .then(response => {
                     if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
-                    document.getElementById("credentials").textContent = data.credecials;
-                    document.getElementById("error").textContent = "";
+                    console.log("Datos recibidos:", data);
+                    
+                    // Reset failed attempts on success
+                    failedAttempts = 0;
+                    document.getElementById("failed_attempts").textContent = failedAttempts;
+                    document.getElementById("status").textContent = "Conectado";
+                    document.getElementById("status").className = "status online";
+                    
+                    // Update debug info
+                    document.getElementById("debug_credentials").textContent = JSON.stringify(data, null, 2);
+                    document.getElementById("last_update").textContent = new Date().toLocaleTimeString();
+
+                    // Parse and display credentials
+                    if (typeof data.credenciales === 'object' && data.credenciales && data.credenciales.usuario) {
+                        document.getElementById("credentials").textContent = 
+                            `Usuario: ${data.credenciales.usuario} | Password: ${data.credenciales.password}`;
+                        document.getElementById("credentials").className = "success";
+                    } else if (typeof data.credenciales === 'string' && data.credenciales.trim() !== "") {
+                        document.getElementById("credentials").textContent = data.credenciales;
+                        document.getElementById("credentials").className = "success";
+                    } else {
+                        document.getElementById("credentials").textContent = "Esperando datos...";
+                        document.getElementById("credentials").className = "";
+                    }
+
+                    // Clear error message
+                    document.getElementById("error_credentials").textContent = "";
+                    document.getElementById("debug_error").textContent = "-";
                 })
                 .catch(error => {
-                    document.getElementById("error").textContent = `Error: ${error.message}`;
                     console.error("Error:", error);
+                    
+                    // Increment failed attempts
+                    failedAttempts++;
+                    document.getElementById("failed_attempts").textContent = failedAttempts;
+                    
+                    // Update status
+                    if (failedAttempts >= MAX_FAILED_ATTEMPTS) {
+                        document.getElementById("status").textContent = "Error de conexión";
+                        document.getElementById("status").className = "status offline";
+                    }
+                    
+                    // Show error
+                    document.getElementById("error_credentials").textContent = `Error: ${error.message}`;
+                    document.getElementById("debug_error").textContent = error.message;
                 });
         }
-        setInterval(actualizarEstado, 2000);
-        actualizarEstado(); // Primera llamada inmediata
+
+        // Update every 2 seconds
+        setInterval(actualizarCredentials, 2000);
+        
+        // Initial call
+        actualizarCredentials();
     </script>
 </body>
+
 </html>
-
-
-
-    <h1>Estado del botón: <span id="estado">Cargando...</span></h1>
-
-    <script>
-        function actualizarEstado() {
-            fetch('/get_estado')
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("estado").textContent = data.estado;
-                });
-        }
-
-        setInterval(actualizarEstado, 2000);
-        actualizarEstado(); 
-    </script>
-

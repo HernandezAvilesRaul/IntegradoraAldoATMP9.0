@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sign Up</title>
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="../loginStyles/images/DoomIndustriesLogo.ico" />
+  <link rel="stylesheet" href="../loginStyles/login.css">
+</head>
+<body>
+  <div class="grid">
+    <div class="register">
+      <div class="credential-icon">🔐</div>
+      <h2>Ingrese las Credenciales</h2>
+      
+      <div id="statusMessage" class="status-message waiting">
+        <div class="spinner"></div>
+        Esperando lectura de credenciales...
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let isProcessing = false;
+
+    // Función para verificar si hay credenciales nuevas
+    async function checkForCredentials() {
+      if (isProcessing) return;
+      
+      try {
+        const response = await fetch('/get_credentials', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.credenciales && data.credenciales !== "") {
+          isProcessing = true;
+          await processCredentials(data.credenciales);
+        }
+      } catch (error) {
+        console.error('Error checking credentials:', error);
+        showMessage('Error de conexión', 'error');
+      }
+    }
+
+    // Función para procesar las credenciales
+    async function processCredentials(credentials) {
+      showMessage('Procesando credenciales...', 'processing');
+      
+      try {
+        const response = await fetch('/receivedCredentials', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            credenciales: credentials
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          showMessage('¡Credenciales válidas! Redirigiendo...', 'success');
+          setTimeout(() => {
+            window.location.href = data.redirect;
+          }, 1500);
+        } else {
+          showMessage(data.message || 'Credenciales inválidas', 'error');
+          // Reiniciar después de mostrar error
+          setTimeout(() => {
+            isProcessing = false;
+            showMessage('Esperando lectura de credenciales...', 'waiting');
+          }, 3000);
+        }
+      } catch (error) {
+        console.error('Error processing credentials:', error);
+        showMessage('Error al procesar credenciales', 'error');
+        setTimeout(() => {
+          isProcessing = false;
+          showMessage('Esperando lectura de credenciales...', 'waiting');
+        }, 3000);
+      }
+    }
+
+    // Función para mostrar mensajes
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('statusMessage');
+      messageDiv.className = `status-message ${type}`;
+      
+      if (type === 'waiting' || type === 'processing') {
+        messageDiv.innerHTML = `<div class="spinner"></div>${message}`;
+      } else {
+        messageDiv.innerHTML = message;
+      }
+    }
+
+    // Iniciar el polling cada 1 segundo
+    setInterval(checkForCredentials, 1000);
+    
+    // También verificar inmediatamente al cargar la página
+    checkForCredentials();
+  </script>
+</body>
+</html>

@@ -1,30 +1,38 @@
 from flask import Flask, request, jsonify, render_template
+import json
 
 app = Flask(__name__)
 
-estado_boton = "UNKNOWN"
 credentials = ""
+print(credentials)
 
-@app.route('/estado_boton', methods=['GET','POST'])
-def recibir_estado():
-    global estado_boton
-    data = request.get_json()
-    if 'estado' in data:
-        estado_boton = data['estado']
-        return jsonify({"mensaje": "Estado recibido", "estado": estado_boton}), 200
-    return jsonify({"error": "Formato incorrecto"}), 400
+@app.route('/estado_boton', methods=['POST'])
+def received():
+    global credentials
+    try:
+        data = request.get_json(force=True)
+        if 'credenciales' in data:
+            credentials = data['credenciales']
+            print("Credenciales recibidas:", credentials)
+            return jsonify({
+                "mensaje": "Credenciales recibidas", 
+                "credenciales": credentials
+            }), 200
+        else:
+            return jsonify({"error": "No se enviaron credenciales"}), 400
+    except Exception as e:
+        return jsonify({"error": f"Error al procesar: {str(e)}"}), 400
 
-@app.route('/get_estado')
-def get_estado():
-    return jsonify({"estado": estado_boton})
-
-@app.route('/get_credentials')
+@app.route('/get_credentials', methods=['GET'])
 def get_credentials():
-    return jsonify({"estado": credentials})
+    global credentials
+    respuesta = credentials
+    credentials = ""  # Limpiar las credenciales despues de enviarlas
+    return jsonify({"credenciales": respuesta})
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5000, debug=True)

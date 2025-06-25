@@ -1,13 +1,22 @@
-from .userCredentials import user
+from .db import get_db_connection
 
-users =[
-    user('sekiro', 'perro'),
-    user('raul', 'fornite'),
-    user('aldo', 'profesor')
-]
+get_db_connection()
 
-admin = user('admin', '123')
-
-def authenticateCredentials(username, password):
-    return admin.validateUsers(username, password)
+def authenticateCredentials(user, password):
+    args = [user, password, '', '', '']
     
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    resultado = cursor.callproc('ValidateCredentials', args)
+
+    encontrado = resultado[2]
+    respuesta = resultado[3]
+    username = resultado[4]
+
+    print(f'Se encontro el el userID:"{encontrado}", Mensaje de respuesta"{respuesta}"')
+
+    cursor.close()
+    conn.close()
+
+    return username

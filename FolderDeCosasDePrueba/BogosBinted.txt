@@ -1,7 +1,5 @@
 Utilizar la arquitectura 
-Model (Backend)
-    Login
-        validar
+Model (FrontEnd)
 
 Module
     login 
