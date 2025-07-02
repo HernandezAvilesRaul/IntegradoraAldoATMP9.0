@@ -6,7 +6,7 @@
 
 const char* ssid = "Totalplay-E64E";
 const char* password = "196AE64E";
-const char* serverUrl = "http://192.168.100.41:5000/estado_boton";
+const char* serverUrl = "http://192.168.100.41:5000/receivedCredentials";
 
 const int botonPin = 13;
 bool botonPresionado = false;
@@ -36,9 +36,11 @@ void enviarCredenciales() {
  
   JsonDocument doc;
   // Construir el JSON
-  doc["credenciales"]["usuario"] = "admin";
-  doc["credenciales"]["password"] = "123";
   
+  doc["credenciales"]["user"] = "USR001";
+  doc["credenciales"]["password"] = "mipassword123";
+  doc["credenciales"]["username"] = "Juan Pérez";
+
   String json;
   serializeJson(doc, json);
 

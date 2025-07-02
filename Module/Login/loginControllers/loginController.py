@@ -25,7 +25,7 @@ def receivedCredentials():
                 return jsonify({
                     "success": True,
                     "username": username,
-                    "redirect": url_for('login_bp.index')  # Genera la URL '/index'
+                    "redirect": url_for('index_bp.index')  # Genera la URL '/index'
                 })
             else:
                 return jsonify({
@@ -52,7 +52,3 @@ def test_db_users():
 @login_bp.route('/login')
 def login():
     return render_template('login.html')
-
-@login_bp.route('/index')
-def index():
-    return render_template('badCredentials.html')
