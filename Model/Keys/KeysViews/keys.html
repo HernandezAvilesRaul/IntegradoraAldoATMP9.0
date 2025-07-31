@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Archivos Key</title>
+    <link rel="stylesheet" href="..\..\KeysStyles\keys.css">
+    <link rel="shortcut icon" href="../IndexStyles/Images/DoomIndustriesLogo.ico" />
+</head>
+<body>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">Key Generator</a>
+        <div class="navbar-nav">
+            <a href="{{ url_for('index_bp.index') }}" class="nav-link">Inicio</a>
+            <a href="#" class="nav-link">Documentación</a>
+        </div>
+    </nav>
+
+
+    <div class="container">
+        <div class="grid">
+            <div class="key-generator">
+                <h2>Generate licensed key</h2>
+
+                <form id="key" method="POST" action="{{ url_for('keys_bp.generate_key') }}">
+                    <div class="form__field">
+                        <label for="keyName">Username</label>
+                        <input type="text" id="keyName" name="KeyUser" placeholder="I.E: Admin" required>
+                    </div>
+
+                    <button type="submit" class="btn">Generate license</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+     
+        document.getElementById('cancelBtn').addEventListener('click', function() {
+            document.getElementById('key').reset();
+        });
+    </script>
+</body>
+</html>

@@ -1,22 +1,23 @@
 from .db import get_db_connection
+import mysql.connector
 
-get_db_connection()
+def saved_keys(key):
+    try:
+        args = []
+        cnx = get_db_connection()
+        cur = cnx.cursor()
 
-def authenticateCredentials(user, password):
-    args = [user, password, '', '', '']
-    
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
-    resultado = cursor.callproc('ValidateCredentials', args)
+        cur.callproc('verified_license', args)
 
-    encontrado = resultado[2]
-    respuesta = resultado[3]
-    username = resultado[4]
+        if len(args) > 0:
+            cnx.close()
+            cur.close()
+            return args[0]
+        else:
+            cnx.close()
+            cur.close()
+            return "Invalid Credentials"
+        
+    except mysql.connector.Error as e:
+        print(f"Error: {e}")
 
-    print(f'Se encontro el el userID:"{encontrado}", Mensaje de respuesta"{respuesta}"')
-
-    cursor.close()
-    conn.close()
-
-    return username
