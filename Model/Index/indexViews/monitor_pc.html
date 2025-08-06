@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de PCs - Tiempo Real</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../IndexStyles/Index.css">
+    <link rel="shortcut icon" href="../IndexStyles/images/DoomIndustriesLogo.ico" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .device-card {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 1rem;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        canvas {
+            background: #34495e;
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .timestamp {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="navbar-brand">
+                <i class="fas fa-desktop"></i> Monitor de PCs
+            </a>
+            <div style="float: right;">
+                <a href="/" class="nav-link">Inicio</a>
+                <a href="/index" class="nav-link">Monitor IoT</a>
+                <a href="/add_device" class="nav-link">Agregar Dispositivo</a>
+                <form action="{{ url_for('login_bp.logout') }}" method="POST" style="display: inline;">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <h1 style="text-align: center;">Dispositivos Tipo PC</h1>
+        <div id="devices-container">
+            {% for device in devices %}
+            <div class="device-card" id="device-{{ device }}">
+                <h3><i class="fas fa-desktop"></i> {{ device }}</h3>
+                <canvas id="{{ device }}-chart" height="200"></canvas>
+                <div class="timestamp" id="{{ device }}-time">Última actualización: --</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const socket = io('http://192.168.100.41:5000');
+        const charts = {};
+        const pc_devices = {{ devices | tojson | safe }};
+
+        document.addEventListener('DOMContentLoaded', function () {
+            pc_devices.forEach(device => {
+                createChart(device);
+                socket.emit('join', { device_name: device });
+            });
+        });
+
+        socket.on('update', function (data) {
+            const deviceName = data.device_name;
+            if (pc_devices.includes(deviceName)) {
+                updateChart(deviceName, data);
+                updateTimestamp(deviceName, data.timestamp);
+            }
+        });
+
+        function createChart(deviceName) {
+            const ctx = document.getElementById(`${deviceName}-chart`).getContext('2d');
+
+            charts[deviceName] = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: ['CPU_usage', 'GPU_usage', 'RAM_usage', 'ROM_usage'].map((metric, i) => ({
+                        label: metric,
+                        data: [],
+                        fill: false,
+                        borderColor: `hsl(${i * 90}, 70%, 60%)`,
+                        tension: 0.1
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    animation: false,
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#bdc3c7'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#ecf0f1'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateChart(deviceName, data) {
+            const chart = charts[deviceName];
+            const time = formatTimestamp(data.timestamp);
+
+            if (!chart) return;
+
+            // Agregar timestamp
+            chart.data.labels.push(time);
+            if (chart.data.labels.length > 20) chart.data.labels.shift();
+
+            // Actualizar datasets
+            chart.data.datasets.forEach(dataset => {
+                const key = dataset.label;
+                dataset.data.push(data[key] ?? 0);
+                if (dataset.data.length > 20) dataset.data.shift();
+            });
+
+            chart.update();
+        }
+
+        function updateTimestamp(deviceName, timestamp) {
+            const ts = document.getElementById(`${deviceName}-time`);
+            if (ts) ts.textContent = `Última actualización: ${formatTimestamp(timestamp)}`;
+        }
+
+        function formatTimestamp(ts) {
+            if (!ts) return '--';
+            const date = new Date(ts);
+            return date.toLocaleString('es-ES', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+        }
+    </script>
+</body>
+</html>

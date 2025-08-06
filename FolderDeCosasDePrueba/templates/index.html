@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard IoT - Monitoreo de Dispositivos</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .devices-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .device-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .device-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .device-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .device-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+        }
+
+        .device-icon::before {
+            content: "📡";
+            font-size: 20px;
+        }
+
+        .device-name {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+            text-transform: capitalize;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: auto;
+            background: #ccc;
+            transition: all 0.3s ease;
+        }
+
+        .status-indicator.online {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+
+        .status-indicator.offline {
+            background: #f44336;
+            box-shadow: 0 0 10px rgba(244, 67, 54, 0.5);
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .temperature .metric-icon::before {
+            content: "🌡️";
+        }
+
+        .humidity .metric-icon::before {
+            content: "💧";
+        }
+
+        .timestamp {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .connection-status.connected {
+            background: #4CAF50;
+        }
+
+        .connection-status.disconnected {
+            background: #f44336;
+        }
+
+        @media (max-width: 768px) {
+            .devices-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .device-card {
+                padding: 20px;
+            }
+        }
+
+        /* Animación de carga */
+        .loading {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard IoT - Monitoreo en Tiempo Real</h1>
+        
+        <div class="connection-status" id="connectionStatus">
+            Conectando...
+        </div>
+
+        <div class="devices-grid" id="devicesGrid">
+            <!-- Los dispositivos se cargarán dinámicamente -->
+        </div>
+    </div>
+
+    <script>
+        // Inicializar Socket.IO
+        const socket = io();
+        
+        // Dispositivos disponibles (pasados desde Flask)
+        const devices = {{ devices | tojson }};
+        
+        // Estado de conexión
+        const connectionStatus = document.getElementById('connectionStatus');
+        const devicesGrid = document.getElementById('devicesGrid');
+        
+        // Función para crear una tarjeta de dispositivo
+        function createDeviceCard(deviceName) {
+            return `
+                <div class="device-card" id="card-${deviceName}">
+                    <div class="device-header">
+                        <div class="device-icon"></div>
+                        <div class="device-name">${deviceName}</div>
+                        <div class="status-indicator offline" id="status-${deviceName}"></div>
+                    </div>
+                    <div class="metrics">
+                        <div class="metric temperature">
+                            <div class="metric-icon"></div>
+                            <div class="metric-value" id="temp-${deviceName}">--</div>
+                            <div class="metric-label">Temperatura °C</div>
+                        </div>
+                        <div class="metric humidity">
+                            <div class="metric-icon"></div>
+                            <div class="metric-value" id="humidity-${deviceName}">--</div>
+                            <div class="metric-label">Humedad %</div>
+                        </div>
+                    </div>
+                    <div class="timestamp" id="timestamp-${deviceName}">
+                        Sin datos disponibles
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Función para actualizar los datos del dispositivo
+        function updateDeviceData(data) {
+            const deviceName = data.device_name;
+            
+            // Actualizar valores
+            document.getElementById(`temp-${deviceName}`).textContent = data.temperatura?.toFixed(1) || '--';
+            document.getElementById(`humidity-${deviceName}`).textContent = data.humedad || '--';
+            document.getElementById(`timestamp-${deviceName}`).textContent = 
+                `Última actualización: ${data.timestamp || 'No disponible'}`;
+            
+            // Actualizar estado de conexión
+            const statusElement = document.getElementById(`status-${deviceName}`);
+            statusElement.className = 'status-indicator online';
+            
+            // Efecto visual de actualización
+            const card = document.getElementById(`card-${deviceName}`);
+            card.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                card.style.transform = 'scale(1)';
+            }, 200);
+        }
+        
+        // Función para formatear la fecha
+        function formatTimestamp(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        // Inicializar dispositivos en la interfaz
+        function initializeDevices() {
+            devicesGrid.innerHTML = '';
+            devices.forEach(device => {
+                devicesGrid.innerHTML += createDeviceCard(device);
+            });
+        }
+        
+        // Eventos de Socket.IO
+        socket.on('connect', function() {
+            console.log('Conectado al servidor');
+            connectionStatus.textContent = 'Conectado';
+            connectionStatus.className = 'connection-status connected';
+            
+            // Unirse a las salas de cada dispositivo
+            devices.forEach(device => {
+                socket.emit('join', {device_name: device});
+            });
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Desconectado del servidor');
+            connectionStatus.textContent = 'Desconectado';
+            connectionStatus.className = 'connection-status disconnected';
+            
+            // Marcar todos los dispositivos como offline
+            devices.forEach(device => {
+                const statusElement = document.getElementById(`status-${device}`);
+                if (statusElement) {
+                    statusElement.className = 'status-indicator offline';
+                }
+            });
+        });
+        
+        socket.on('update', function(data) {
+            console.log('Datos recibidos:', data);
+            updateDeviceData(data);
+        });
+        
+        // Inicializar la aplicación
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeDevices();
+        });
+        
+        // Verificar dispositivos offline cada 30 segundos
+        setInterval(() => {
+            devices.forEach(device => {
+                // Aquí podrías implementar lógica para detectar dispositivos offline
+                // basándote en el tiempo transcurrido desde la última actualización
+            });
+        }, 30000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+body {
+  background: #354152;
+  color: #7e8ba3;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid {
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.register {
+  background: #232b38;
+  border-radius: 20px;
+  box-shadow: 0 0 40px #000a;
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+h2 {
+  color: #fff;
+  font-weight: 200;
+  margin-bottom: 2rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.form__field {
+  margin-bottom: 1.5rem;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #242c37;
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border-color: #8ceabb;
+}
+
+input[type="submit"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-bottom: 1rem;
+}
+
+input[type="submit"]:hover {
+  background: linear-gradient(160deg, #378f7b 0%, #8ceabb 100%);
+}
+
+a {
+  color: #8ceabb;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover {
+  color: #fff;
+}
+
+@media (max-width: 500px) {
+  .register {
+    padding: 2rem 1rem;
+  }
+  .grid {
+    max-width: 95vw;
+  }
+}
+
+.container {
+  text-align: center;
+}
+
+input[type="submit"], input[type="button"] {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+input[type="submit"]:hover, input[type="button"]:hover {
+  opacity: 0.9;
+}
+
+.custom-file-btn {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.custom-file-btn:hover {
+  background: linear-gradient(160deg, #378f7b 0%, #8ceabb 100%);
+}
+
+.file-name {
+  display: block;
+  margin-top: 0.5rem;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+/* Asegurar que todos los elementos usen box-sizing border-box */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Estilos para otros elementos que puedas usar */
+p {
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+/* Estilo para listas */
+ul, ol {
+  padding-left: 1.5rem;
+  color: #fff;
+}
+
+/* Estilo para tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #354152;
+  color: #fff;
+}
+
+th {
+  background-color: #2a3647;
+}
+
+/* Estilo para textarea */
+textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #242c37;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  min-height: 100px;
+  resize: vertical;
+}
+
+textarea:focus {
+  border-color: #8ceabb;
+}
+
+/* Estilo para select */
+select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #242c37;
+  border-radius: 999px;
+  background: #2a3647;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+}
+
+select:focus {
+  border-color: #8ceabb;
+}

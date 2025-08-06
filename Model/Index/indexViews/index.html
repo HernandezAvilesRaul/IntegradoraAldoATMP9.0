@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de Dispositivos IoT - Dinámico</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../IndexStyles/Index.css">
+    <link rel="shortcut icon" href="../IndexStyles/images/DoomIndustriesLogo.ico" />
+</head>
+
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="container">
+            <a href="#" class="navbar-brand">
+                <i class="fas fa-microchip"></i> IoT Monitor
+            </a>
+            <div style="float: right;">
+                <a href="/" class="nav-link active">Inicio</a>
+                <a href="/add_device" class="nav-link">Agregar Dispositivo</a>
+
+                <a class="nav-link" href="{{ url_for('keys_bp.key_generator') }}">Generar Key</a>
+                <a class="nav-link" href="{{ url_for('keys_bp.show_keys') }}">Ver Keys</a>
+
+                <form action="{{ url_for('login_bp.logout') }}" method="POST" style="display: inline;">
+                    <button type="submit" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </form>
+
+            </div>
+        </div>
+        </div>
+    </nav>
+
+    <!-- Contenido principal -->
+    <div class="container">
+        <h1>Monitor de Dispositivos IoT</h1>
+
+        <div style="margin-bottom: 2rem; text-align: center;">
+            <a href="/add_device" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Agregar Nuevo Dispositivo
+            </a>
+            <a href="/monitor_pc" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Graficos de las PC
+            </a>
+            <button class="btn btn-secondary" onclick="clearAllData()" style="margin-left: 10px;">
+                <i class="fas fa-broom"></i> Limpiar Datos
+            </button>
+        
+        </div>
+
+        <div class="row" id="devices-container">
+            <!-- Los dispositivos se agregarán aquí dinámicamente -->
+            {% for device in devices %}
+            <div class="col-12 col-lg-6 col-xl-4">
+                <div class="card device-card" id="device-{{ device }}">
+                    <div class="card-header">
+                        <i class="fas fa-microchip me-2"></i>{{ device }}
+                    </div>
+                    <div class="card-body" id="{{ device }}-body">
+                        <div class="no-data">
+                            Esperando datos...
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="timestamp text-center" id="{{ device }}-time">
+                            Última actualización: --
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        // Conectar a Socket.IO
+        const socket = io('http://192.168.100.41:5000');
+
+        // Almacenar los datos de cada dispositivo
+        const deviceData = {};
+
+        // Unirse a las salas de cada dispositivo cuando la página se carga
+        document.addEventListener('DOMContentLoaded', function () {
+            const devices = {{ devices | tojson | safe
+        }};
+
+        devices.forEach(device => {
+            // Inicializar datos del dispositivo
+            deviceData[device] = {};
+
+            // Unirse a la sala del dispositivo
+            socket.emit('join', { device_name: device });
+        });
+
+        // Escuchar actualizaciones
+        socket.on('update', function (data) {
+            const deviceName = data.device_name;
+            if (!deviceName) return;
+
+            updateDeviceData(deviceName, data);
+        });
+        });
+
+        // Función para actualizar los datos del dispositivo en la UI
+        function updateDeviceData(deviceName, data) {
+            // Actualizar los datos almacenados
+            Object.keys(data).forEach(key => {
+                if (key !== 'device_name' && key !== 'timestamp') {
+                    deviceData[deviceName][key] = data[key];
+                }
+            });
+
+            // Renderizar la UI del dispositivo
+            renderDeviceData(deviceName, data.timestamp);
+        }
+
+        // Función para renderizar dinámicamente los datos del dispositivo
+        function renderDeviceData(deviceName, timestamp) {
+            const cardBody = document.getElementById(`${deviceName}-body`);
+            const data = deviceData[deviceName];
+
+            if (Object.keys(data).length === 0) {
+                cardBody.innerHTML = '<div class="no-data">Esperando datos...</div>';
+                return;
+            }
+
+            let html = '<div class="data-grid">';
+
+            // Crear elementos para cada tipo de dato
+            Object.entries(data).forEach(([key, value]) => {
+                const formattedKey = formatDataLabel(key);
+                const formattedValue = formatDataValue(value);
+                const unit = getDataUnit(key);
+
+                html += `
+                    <div class="data-item">
+                        <div class="data-label">${formattedKey}</div>
+                        <div class="data-value">${formattedValue}</div>
+                        ${unit ? `<div class="text-muted small">${unit}</div>` : ''}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            cardBody.innerHTML = html;
+
+            // Actualizar timestamp
+            if (timestamp) {
+                document.getElementById(`${deviceName}-time`).textContent =
+                    `Última actualización: ${formatTimestamp(timestamp)}`;
+            }
+        }
+
+        // Función para formatear las etiquetas de datos
+        function formatDataLabel(label) {
+            // Convertir a formato más legible
+            return label.charAt(0).toUpperCase() + label.slice(1)
+                .replace(/_/g, ' ')
+                .replace(/([A-Z])/g, ' $1')
+                .trim();
+        }
+
+        // Función para formatear valores
+        function formatDataValue(value) {
+            if (typeof value === 'number') {
+                // Si es un número decimal, mostrar con 2 decimales
+                return value % 1 !== 0 ? value.toFixed(2) : value.toString();
+            }
+            return value.toString();
+        }
+
+        // Función para obtener unidades basadas en el tipo de dato
+        function getDataUnit(dataType) {
+            const units = {
+                'temperatura': '°C',
+                'temperature': '°C',
+                'temp': '°C',
+                'humedad': '%',
+                'humidity': '%',
+                'presion': 'hPa',
+                'pressure': 'hPa',
+                'velocidad': 'm/h',
+                'speed': 'm/h',
+                'distancia': 'cm',
+                'distance': 'cm',
+                'voltaje': 'V',
+                'voltage': 'V',
+                'corriente': 'A',
+                'current': 'A',
+                'potencia': 'W',
+                'power': 'W',
+                'luminosidad': 'lux',
+                'light': 'lux',
+                'co2': 'ppm',
+                'ph': 'pH',
+                'peso': 'kg',
+                'weight': 'kg'
+            };
+
+            return units[dataType.toLowerCase()] || '';
+        }
+
+        // Función para formatear el timestamp
+        function formatTimestamp(timestamp) {
+            if (!timestamp) return '--';
+
+            const date = new Date(timestamp);
+            return date.toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+
+        // Función para limpiar todos los datos
+        function clearAllData() {
+            Object.keys(deviceData).forEach(device => {
+                deviceData[device] = {};
+                renderDeviceData(device);
+                document.getElementById(`${device}-time`).textContent = 'Última actualización: --';
+            });
+        }
+
+        // Manejar nuevos dispositivos que se conecten dinámicamente
+        socket.on('new_device', function (data) {
+            const deviceName = data.device_name;
+            if (!deviceData[deviceName]) {
+                deviceData[deviceName] = {};
+                addDeviceToUI(deviceName);
+            }
+        });
+
+        // Función para agregar un nuevo dispositivo a la UI
+        function addDeviceToUI(deviceName) {
+            const container = document.getElementById('devices-container');
+            const deviceHTML = `
+                <div class="col-12 col-lg-6 col-xl-4">
+                    <div class="card device-card" id="device-${deviceName}">
+                        <div class="card-header">
+                            <i class="fas fa-microchip me-2"></i>${deviceName}
+                        </div>
+                        <div class="card-body" id="${deviceName}-body">
+                            <div class="no-data">
+                                Esperando datos...
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="timestamp text-center" id="${deviceName}-time">
+                                Última actualización: --
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', deviceHTML);
+
+            // Unirse a la sala del nuevo dispositivo
+            socket.emit('join', { device_name: deviceName });
+        }
+    </script>
+</body>
+
+</html>

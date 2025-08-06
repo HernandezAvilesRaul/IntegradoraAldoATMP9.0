@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="shortcut icon" href="../../../Images/DoomIndustriesLogo.ico" />
+    <link rel="stylesheet" href="../loginStyles/login.css">
+</head>
+<body>
+    <div class="grid">
+        <div class="register">
+            <h2>Doom Industries</h2>
+            <form id="login-form" enctype="multipart/form-data">
+                <div class="form__field">
+                    <!-- Input de archivo oculto -->
+                    <input type="file" name="license" id="license" accept=".key,application/json" required hidden>
+                    
+                    <!-- Label personalizado como botón -->
+                    <label for="license" class="custom-file-btn">Seleccionar archivo</label>
+                    
+                    <!-- Texto opcional para mostrar nombre del archivo -->
+                    <span id="file-name" class="file-name">Ningún archivo seleccionado</span>
+                </div>
+                
+                <div class="form__field">
+                    <input type="submit" value="Enviar" id="submit-btn">
+                </div>
+                
+                <!-- Mensaje de estado -->
+                <div id="message" class="message" style="display: none;"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Mostrar nombre del archivo seleccionado
+        document.getElementById('license').addEventListener('change', function(e) {
+            const fileName = e.target.files[0] ? e.target.files[0].name : 'Ningún archivo seleccionado';
+            document.getElementById('file-name').textContent = fileName;
+        });
+
+        // Manejar envío del formulario
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-btn');
+            const messageDiv = document.getElementById('message');
+            
+            // Deshabilitar botón y mostrar loading
+            submitBtn.disabled = true;
+            submitBtn.value = 'Enviando...';
+            messageDiv.style.display = 'none';
+            
+            try {
+                const formData = new FormData(this);
+                
+                const response = await fetch('/received_credentials', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    // Mostrar mensaje de éxito
+                    messageDiv.textContent = 'Login exitoso, redirigiendo...';
+                    messageDiv.className = 'message success';
+                    messageDiv.style.display = 'block';
+                    
+                    // Redirigir después de un breve delay
+                    setTimeout(() => {
+                        window.location.href = result.redirect_url;
+                    }, 1500);
+                    
+                } else {
+                    // Mostrar mensaje de error
+                    messageDiv.textContent = result.message || 'Error en el login';
+                    messageDiv.className = 'message error';
+                    messageDiv.style.display = 'block';
+                }
+                
+            } catch (error) {
+                // Error de red o parsing
+                messageDiv.textContent = 'Error de conexión. Intenta nuevamente.';
+                messageDiv.className = 'message error';
+                messageDiv.style.display = 'block';
+            }
+            
+            // Rehabilitar botón
+            submitBtn.disabled = false;
+            submitBtn.value = 'Enviar';
+        });
+    </script>
+
+    <style>
+        .message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</body>
+</html>

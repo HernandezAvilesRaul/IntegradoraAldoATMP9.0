@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Dispositivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../IndexStyles/regis_devices.css">
+    <link rel="shortcut icon" href="../IndexStyles/images/DoomIndustriesLogo.ico" />
+</head>
+
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">
+            <i class="fas fa-microchip"></i> IoT Monitor
+        </a>
+        <div class="nav-links">
+            <a href="/index" class="nav-link">Inicio</a>
+            <a href="/add_device" class="nav-link active">Agregar Dispositivo</a>
+           <form action="{{ url_for('login_bp.logout') }}" method="POST" style="display: inline;">
+                    <button type="" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                    </button>
+                </form>
+
+        </div>
+        </div>
+    </nav>
+
+    <div class="grid">
+        <div class="register">
+            <h2>Registrar Nuevo Dispositivo</h2>
+
+            <!-- Mensajes -->
+            <div id="message" class="message" style="display:none;"></div>
+
+            <!-- Formulario -->
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="device_name">Nombre del dispositivo</label>
+                    <input type="text" id="device_name" name="device_name" placeholder="Ej: Sensor Temperatura Sala"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label for="device_type">Tipo de dispositivo</label>
+                    <select id="device_type" name="device_type" required>
+                        <option value="" disabled selected>Seleccione un tipo</option>
+                        <option value="embedded">Dispositivo Embebido</option>
+                        <option value="pc">Computadora</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="device_url">URL del dispositivo</label>
+                    <input type="url" id="device_url" name="device_url" placeholder="Ej: http://192.168.1.100" required>
+                </div>
+
+                <button type="submit">
+                    <i class="fas fa-plus-circle"></i> Registrar Dispositivo
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("register-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const deviceName = document.getElementById("device_name").value.trim();
+            const deviceType = document.getElementById("device_type").value.trim();
+            const deviceUrl = document.getElementById("device_url").value.trim();
+
+            const messageDiv = document.getElementById("message");
+
+            // Validación adicional
+            if (!deviceName || !deviceType || !deviceUrl) {
+                messageDiv.textContent = "❌ Todos los campos son requeridos";
+                messageDiv.className = "message error";
+                messageDiv.style.display = "block";
+                return;
+            }
+
+            try {
+                const res = await fetch("/register_device", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        device_name: deviceName,
+                        device_type: deviceType,
+                        device_url: deviceUrl
+                    })
+                });
+
+                if (res.status === 204) {
+                    messageDiv.textContent = "✅ Dispositivo registrado con éxito";
+                    messageDiv.className = "message success";
+                    messageDiv.style.display = "block";
+                    document.getElementById("register-form").reset();
+
+                    // Redirigir después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = "/";
+                    }, 2000);
+                } else {
+                    const errorData = await res.json();
+                    throw new Error(errorData.message || "Error en el registro");
+                }
+            } catch (err) {
+                messageDiv.textContent = `❌ ${err.message || "No se pudo registrar el dispositivo"}`;
+                messageDiv.className = "message error";
+                messageDiv.style.display = "block";
+            }
+        });
+    </script>
+</body>
+
+</html>
