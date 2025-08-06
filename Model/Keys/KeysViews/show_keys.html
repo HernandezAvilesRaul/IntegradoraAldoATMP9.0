@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios con Keys</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="../IndexStyles/Images/DoomIndustriesLogo.ico" />
+    <link rel="stylesheet" href="../KeysStyles/show_keys.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="#" class="navbar-brand">
+            <i class="fas fa-users-cog"></i> Panel de Usuarios
+        </a>
+        <div>
+            <a href="{{ url_for('index_bp.index') }}" class="nav-link"
+                style="color: #7e8ba3; text-decoration: none; margin-right: 1.5rem;">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            <a href="{{ url_for('keys_bp.key_generator') }}" class="nav-link"
+                style="color: #8ceabb; text-decoration: none;">
+                <i class="fas fa-key"></i> Generar Key
+            </a>
+            <form action="{{ url_for('login_bp.logout') }}" method="POST" style="display: inline;">
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </form>
+
+        </div>
+        </div>
+        </div>
+    </nav>
+
+    <div class="grid">
+        <div class="register">
+            <h2>Usuarios Registrados</h2>
+            <div id="message" class="message" style="display: none;"></div>
+
+            <div style="overflow-x: auto;">
+                <table class="user-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre de Usuario</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if users %}
+                        {% for user, id in users.items() %}
+                        <tr id="user-{{ user }}">
+                            <td>{{ id }}</td>
+                            <td>{{ user }}</td>
+                            <td>
+                                <button class="delete-btn" data-id="{{ id }}" data-user="{{ user }}">
+                                    <i class="fas fa-trash-alt"></i> Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #7e8ba3;">No hay usuarios registrados.
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const buttons = document.querySelectorAll(".delete-btn");
+            const messageBox = document.getElementById("message");
+
+            buttons.forEach(button => {
+                button.addEventListener("click", async () => {
+                    const userId = button.getAttribute("data-id");
+                    const userName = button.getAttribute("data-user");
+
+                    if (!confirm(`¿Estás seguro de que deseas eliminar al usuario "${userName}"? Esta acción no se puede deshacer.`)) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`/delete_keys/${userId}/${userName}`, {
+                            method: "POST",
+                            headers: {
+                                "X-Requested-With": "XMLHttpRequest",
+                                "Content-Type": "application/json"
+                            },
+                        });
+
+                        if (response.ok) {
+                            // Eliminar la fila de la tabla
+                            document.getElementById(`user-${userName}`).remove();
+                            showMessage(`Usuario "${userName}" eliminado correctamente.`, "success");
+
+                            // Si era el último usuario, mostrar mensaje
+                            if (document.querySelectorAll(".user-table tbody tr").length === 1) {
+                                document.querySelector(".user-table tbody").innerHTML = `
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: #7e8ba3;">
+                                            No hay usuarios registrados.
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                        } else {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || "Error al eliminar el usuario");
+                        }
+                    } catch (error) {
+                        showMessage(error.message || "Error al conectar con el servidor", "error");
+                        console.error("Error:", error);
+                    }
+                });
+            });
+
+            function showMessage(text, type) {
+                messageBox.textContent = text;
+                messageBox.style.display = "block";
+                messageBox.className = `message ${type}`;
+                setTimeout(() => {
+                    messageBox.style.display = "none";
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+
+</html>

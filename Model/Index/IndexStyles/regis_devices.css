@@ -1,0 +1,228 @@
+/* Estilos generales */
+body {
+    background: #354152;
+    color: #7e8ba3;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Barra de navegación */
+.navbar {
+    background: #232b38;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 200;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar-brand:hover {
+    color: #8ceabb;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.nav-link {
+    color: #7e8ba3;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: #8ceabb;
+}
+
+.nav-link.active {
+    color: #8ceabb;
+    border-bottom: 2px solid #8ceabb;
+    padding-bottom: 0.25rem;
+}
+
+/* Botón de logout */
+.logout-btn {
+    background: none;
+    border: none;
+    color: #7e8ba3;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.logout-btn:hover {
+    color: #8ceabb;
+}
+
+/* Contenedor principal */
+.grid {
+    max-width: 500px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.register {
+    background: #232b38;
+    border-radius: 20px;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+    padding: 2.5rem;
+    text-align: center;
+}
+
+h2 {
+    color: #fff;
+    font-weight: 200;
+    margin-bottom: 2rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-size: 1.8rem;
+}
+
+/* Formulario */
+form {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #7e8ba3;
+    font-size: 0.95rem;
+}
+
+input[type="text"],
+input[type="url"],
+select {
+    width: 100%;
+    padding: 0.8rem 1.2rem;
+    border: 1px solid #242c37;
+    border-radius: 999px;
+    background: #2a3647;
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="url"]:focus,
+select:focus {
+    border-color: #8ceabb;
+    box-shadow: 0 0 0 2px rgba(140, 234, 187, 0.2);
+}
+
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237e8ba3'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+button[type="submit"]:hover {
+    background: linear-gradient(160deg, #378f7b 0%, #8ceabb 100%);
+    transform: translateY(-2px);
+}
+
+/* Mensajes */
+.message {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    border-radius: 5px;
+    text-align: center;
+    font-weight: bold;
+    display: none;
+}
+
+.message.success {
+    background-color: rgba(46, 204, 113, 0.2);
+    color: #2ecc71;
+    border: 1px solid #2ecc71;
+}
+
+.message.error {
+    background-color: rgba(231, 76, 60, 0.2);
+    color: #e74c3c;
+    border: 1px solid #e74c3c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
+    }
+    
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .register {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 500px) {
+    .grid {
+        padding: 0 0.75rem;
+    }
+    
+    .register {
+        padding: 1.5rem 1rem;
+    }
+    
+    input[type="text"],
+    input[type="url"],
+    select {
+        padding: 0.7rem 1rem;
+    }
+}

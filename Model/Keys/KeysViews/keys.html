@@ -1,21 +1,37 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generador de Archivos Key</title>
-    <link rel="stylesheet" href="..\..\KeysStyles\keys.css">
-    <link rel="shortcut icon" href="../IndexStyles/Images/DoomIndustriesLogo.ico" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="shortcut icon" href="../../Images/DoomIndustriesLogo.ico" />
+    <link rel="stylesheet" href="../KeysStyles/keys.css">
+
 </head>
+
 <body>
     <nav class="navbar">
-        <a href="#" class="navbar-brand">Key Generator</a>
+        <a href="#" class="navbar-brand">
+            <i class="fas fa-key"></i> Key Generator
+        </a>
+        
         <div class="navbar-nav">
-            <a href="{{ url_for('index_bp.index') }}" class="nav-link">Inicio</a>
-            <a href="#" class="nav-link">Documentación</a>
-        </div>
-    </nav>
+            <a href="{{ url_for('index_bp.index') }}" class="nav-link">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            <a class="nav-link" href="{{ url_for('keys_bp.show_keys') }}">Ver Keys</a>
 
+            <form action="{{ url_for('login_bp.logout') }}" method="POST" style="display: inline;">
+                <button type="submit" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </form>
+
+        </div>
+
+    </nav>
 
     <div class="container">
         <div class="grid">
@@ -25,21 +41,25 @@
                 <form id="key" method="POST" action="{{ url_for('keys_bp.generate_key') }}">
                     <div class="form__field">
                         <label for="keyName">Username</label>
-                        <input type="text" id="keyName" name="KeyUser" placeholder="I.E: Admin" required>
+                        <input type="text" id="keyName" name="KeyUser" placeholder="Enter your username" required>
                     </div>
 
-                    <button type="submit" class="btn">Generate license</button>
-                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-key"></i> Generate license
+                    </button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 
     <script>
-     
-        document.getElementById('cancelBtn').addEventListener('click', function() {
+        document.getElementById('cancelBtn').addEventListener('click', function () {
             document.getElementById('key').reset();
         });
     </script>
 </body>
+
 </html>

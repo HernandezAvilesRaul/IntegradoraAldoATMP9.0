@@ -1,23 +1,27 @@
 from .db import get_db_connection
 import mysql.connector
 
-def saved_keys(key):
+def saved_keys(username, key):
     try:
-        args = []
         cnx = get_db_connection()
         cur = cnx.cursor()
+        args = [username, key, False]
 
-        cur.callproc('verified_license', args)
+        cur.callproc('verify_keys', args)
 
-        if len(args) > 0:
-            cnx.close()
-            cur.close()
-            return args[0]
-        else:
-            cnx.close()
-            cur.close()
-            return "Invalid Credentials"
+        output_args = cur.callproc('verify_keys', args)
+
+        print("Resultado:", output_args[2])
         
+        if output_args[2] == True:
+            cnx.close()
+            cur.close()
+
+            return output_args[2]  
+
+        else:
+            return "Invalid Credentials"
+
     except mysql.connector.Error as e:
         print(f"Error: {e}")
-
+        return None

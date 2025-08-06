@@ -6,7 +6,7 @@
 
 const char* ssid = "Totalplay-E64E";
 const char* password = "196AE64E";
-const char* serverUrl = "http://192.168.100.41:5000/receivedCredentials";
+const char* serverUrl = "http://192.168.100.41:5000/data";
 
 const int botonPin = 13;
 bool botonPresionado = false;

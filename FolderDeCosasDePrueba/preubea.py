@@ -69,10 +69,12 @@ def get_ice_cream(flavor):
 get_ice_cream("chocolate")
 '''
 
+'''
 import datetime
 def log(func):
     def wrapper(*args, **kwargs):
-        with open(r"e:\nkh31\Documents\IntegradoraAldo10.0\IntegradoraAldoATMP9.0\FolderDeCosasDePrueba\logs.txt", "a") as f:
+        
+        #with open(r"e:kh31\Documents\IntegradoraAldo10.0\IntegradoraAldoATMP9.0\FolderDeCosasDePrueba\logs.txt", "a") as f:
             f.write("Called function with " + " ".join([str(arg) for arg in args]) + " at " + str(datetime.datetime.now()) + "\n")
         val = func(*args, **kwargs)
         return val
@@ -84,3 +86,13 @@ def run(a, b, c=3):
     print(a + b + c)
 
 run(5, 10, c=3)
+'''
+
+
+cosas = [
+    (1, 'Raul', 'raul@email.com'),
+    (2, 'Fornite', 'fornite@email.com'),
+    (3, 'Admin', 'admin@email.com')
+]
+
+print(cosas[0][2])

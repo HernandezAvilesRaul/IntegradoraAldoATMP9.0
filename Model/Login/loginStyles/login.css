@@ -102,3 +102,96 @@ input[type="submit"], input[type="button"] {
 input[type="submit"]:hover, input[type="button"]:hover {
   opacity: 0.9;
 }
+
+.custom-file-btn {
+  display: inline-block;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(160deg, #8ceabb 0%, #378f7b 100%);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.custom-file-btn:hover {
+  background: linear-gradient(160deg, #378f7b 0%, #8ceabb 100%);
+}
+
+.file-name {
+  display: block;
+  margin-top: 0.5rem;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+/* Asegurar que todos los elementos usen box-sizing border-box */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Estilos para otros elementos que puedas usar */
+p {
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+}
+
+/* Estilo para listas */
+ul, ol {
+  padding-left: 1.5rem;
+  color: #fff;
+}
+
+/* Estilo para tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+}
+
+th, td {
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid #354152;
+  color: #fff;
+}
+
+th {
+  background-color: #2a3647;
+}
+
+/* Estilo para textarea */
+textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #242c37;
+  border-radius: 10px;
+  background: transparent;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+  min-height: 100px;
+  resize: vertical;
+}
+
+textarea:focus {
+  border-color: #8ceabb;
+}
+
+/* Estilo para select */
+select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #242c37;
+  border-radius: 999px;
+  background: #2a3647;
+  color: #fff;
+  font-size: 1rem;
+  outline: none;
+}
+
+select:focus {
+  border-color: #8ceabb;
+}
